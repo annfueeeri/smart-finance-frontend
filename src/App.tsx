@@ -27,7 +27,7 @@ function App() {
       <div className="grid-floor" aria-hidden="true" />
 
       <header className="masthead">
-        <a className="brand" href="#/" aria-label="Smart Finance 首页">
+        <a className="brand" href="#/" aria-label="Smart Finance ホーム">
           <span className="brand-mark" aria-hidden="true">S<span>F</span></span>
           <span>SMART<span className="brand-light"> FINANCE</span></span>
         </a>
@@ -43,11 +43,11 @@ function App() {
           <span className="orbit-dot" />
         </div>
         <p className="eyebrow"><span /> THE FUTURE IS IN YOUR HANDS</p>
-        <h1 id="welcome-title">欢迎来到<br /><span>财富的下一站</span><span className="title-dot">.</span></h1>
-        <p className="intro">让每一份积累，都有更远的未来。<br />从这里，开启你的智慧财务旅程。</p>
+        <h1 id="welcome-title">ようこそ<br /><span>資産の新たな未来へ</span><span className="title-dot">.</span></h1>
+        <p className="intro">日々の積み重ねが、未来の可能性を広げる。<br />ここから、スマートな資産管理を始めよう。</p>
         <div className="login-area">
           <a className="login-button" href="#/login">
-            <span>登录，开启未来</span><span className="button-arrow" aria-hidden="true">↗</span>
+            <span>ログインして始める</span><span className="button-arrow" aria-hidden="true">↗</span>
           </a>
           <p className="login-caption">YOUR MONEY. YOUR POSSIBILITIES.</p>
         </div>
@@ -55,7 +55,7 @@ function App() {
 
       <footer className="footer">
         <span>© {copyrightYear} SMART FINANCE</span>
-        <span className="footer-message"><span /> 每一步，向未来</span>
+        <span className="footer-message"><span /> 一歩ずつ、未来へ</span>
         <span className="footer-coordinate">DESIGNED FOR WHAT’S NEXT ↗</span>
       </footer>
 

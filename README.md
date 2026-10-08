@@ -1,21 +1,22 @@
 # Smart Finance Frontend
 
-React 19.2 + TypeScript + Vite 开发环境，使用 npm 和 package-lock.json 锁定依赖。
+React 19.2 + TypeScript + Vite の開発環境です。npm と package-lock.json で依存関係を管理します。
 
-## 开始开发
+## 開発を始める
 
-需要 Node.js 20.19+ 或 22.12+（云环境当前使用 Node.js 24）。
+Node.js 20.19 以上、または 22.12 以上が必要です（クラウド環境では Node.js 24 を使用）。
+プロジェクトのルートディレクトリで、次のコマンドを実行してください。
 
 ```bash
-cd /workspace/smart-finance-frontend
 npm ci
-npm run dev -- --host 0.0.0.0 --port 5173 --strictPort
+npm run dev
 ```
 
-从 `src/App.tsx` 开始编写页面，保存后 Vite 自动热更新。
-`.npmrc` 将 npm 缓存放在云环境可写的 `/workspace/.npm-cache`；在其他机器上可覆盖此缓存路径。
+`src/App.tsx` から画面の開発を始められます。保存すると Vite が変更を即座に反映します。
+`.npmrc` は npm キャッシュをクラウド環境の `/workspace/.npm-cache` に配置します。
+ローカル環境では、このキャッシュ設定を削除するか、書き込み可能なパスに変更してください。
 
-## 验证与构建
+## 検証とビルド
 
 ```bash
 npm run lint
@@ -23,5 +24,14 @@ npm run build
 npm run preview -- --host 0.0.0.0 --port 4173 --strictPort
 ```
 
-构建命令包含 TypeScript 检查，输出位于 `dist/`。项目目前没有自动化测试套件。
-本地静态前端开发不需要 API 密钥或后端服务；连接业务 API 时再配置相关环境变量。
+ビルドには TypeScript の型チェックが含まれます。出力先は `dist/` です。
+このプロジェクトには、現時点で自動テストスイートはありません。
+
+## デモ画面
+
+ホーム画面からログイン画面へ移動できます。
+現在はデモモードのため、メールアドレスやパスワードを入力せずに「ログイン」を押すと資産一覧に移動します。
+ログイン情報の検証や認証 API への接続は行いません。
+左側のメニューから、資産一覧、収支明細、口座管理、予算管理、資産分析、システム設定に移動できます。
+金額や取引履歴はサンプルデータです。一部のモジュールの業務機能は今後追加予定です。
+デモ画面の開発に API キーやバックエンドサービスは不要です。
