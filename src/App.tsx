@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import LoginPage from './LoginPage'
+import DashboardPage from './DashboardPage'
 import './App.css'
 
 const copyrightYear = new Date().getFullYear()
@@ -17,6 +18,7 @@ function App() {
   )
 
   if (route === '#/login') return <LoginPage />
+  if (route === '#/dashboard' || route.startsWith('#/dashboard/')) return <DashboardPage route={route} />
 
   return (
     <main className="welcome">

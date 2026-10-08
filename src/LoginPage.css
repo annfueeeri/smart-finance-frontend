@@ -28,13 +28,10 @@
 .form-field input { font: inherit; font-size: 13px; width: 100%; height: 50px; border: 1px solid #98b4cb2b; border-radius: 8px; background: #070e19a8; color: #eaf2ff; padding: 0 15px; outline: none; transition: border-color .2s, box-shadow .2s; }
 .form-field input::placeholder { color: #687d93; }
 .form-field input:focus { border-color: #99e9df; box-shadow: 0 0 0 3px #99e9df16; }
-.form-field input[aria-invalid='true'] { border-color: #efacaa; }
 .password-control { position: relative; }
 .password-control input { padding-right: 70px; }
 .password-toggle { position: absolute; right: 8px; top: 8px; min-height: 34px; padding: 0 10px; border: 0; border-radius: 4px; background: transparent; color: #a0bbce; font-size: 11px; }
 .password-toggle:hover { background: #9ae6e513; color: #b2f5ed; }
-.field-error { font-size: 12px; color: #f3b4b0; margin: 8px 0 0; line-height: 1.5; }
 .login-card .submit-login { width: 100%; min-height: 52px; margin-top: 5px; font-size: 13px; }
-.login-feedback { min-height: 20px; margin-top: -9px; font-size: 12px; line-height: 1.7; color: #b4cfe0; }
 .card-bottom { display: flex; justify-content: center; align-items: center; gap: 8px; border-top: 1px solid #92cbd31c; padding-top: 20px; margin-top: 10px; font-size: 10px; letter-spacing: 1.5px; color: #8199ac; }
 .card-bottom > span:first-child { color: #9addd4; }
