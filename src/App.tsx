@@ -1,10 +1,22 @@
-import { useRef } from 'react'
+import { useSyncExternalStore } from 'react'
+import LoginPage from './LoginPage'
 import './App.css'
 
 const copyrightYear = new Date().getFullYear()
 
+function subscribeToRoute(onChange: () => void) {
+  window.addEventListener('hashchange', onChange)
+  return () => window.removeEventListener('hashchange', onChange)
+}
+
 function App() {
-  const loginDialog = useRef<HTMLDialogElement>(null)
+  const route = useSyncExternalStore(
+    subscribeToRoute,
+    () => window.location.hash,
+    () => '',
+  )
+
+  if (route === '#/login') return <LoginPage />
 
   return (
     <main className="welcome">
@@ -13,7 +25,7 @@ function App() {
       <div className="grid-floor" aria-hidden="true" />
 
       <header className="masthead">
-        <a className="brand" href="/" aria-label="Smart Finance 首页">
+        <a className="brand" href="#/" aria-label="Smart Finance 首页">
           <span className="brand-mark" aria-hidden="true">S<span>F</span></span>
           <span>SMART<span className="brand-light"> FINANCE</span></span>
         </a>
@@ -32,9 +44,9 @@ function App() {
         <h1 id="welcome-title">欢迎来到<br /><span>财富的下一站</span><span className="title-dot">.</span></h1>
         <p className="intro">让每一份积累，都有更远的未来。<br />从这里，开启你的智慧财务旅程。</p>
         <div className="login-area">
-          <button className="login-button" onClick={() => loginDialog.current?.showModal()}>
+          <a className="login-button" href="#/login">
             <span>登录，开启未来</span><span className="button-arrow" aria-hidden="true">↗</span>
-          </button>
+          </a>
           <p className="login-caption">YOUR MONEY. YOUR POSSIBILITIES.</p>
         </div>
       </section>
@@ -45,14 +57,6 @@ function App() {
         <span className="footer-coordinate">DESIGNED FOR WHAT’S NEXT ↗</span>
       </footer>
 
-      <dialog ref={loginDialog} className="login-dialog" aria-labelledby="login-title">
-        <form method="dialog">
-          <span className="dialog-symbol" aria-hidden="true">✦</span>
-          <h2 id="login-title">下一站，即将开启</h2>
-          <p>登录功能即将开放，期待与你一起探索更多可能。</p>
-          <button className="dialog-close">返回欢迎页</button>
-        </form>
-      </dialog>
     </main>
   )
 }
