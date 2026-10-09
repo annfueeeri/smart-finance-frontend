@@ -11,7 +11,7 @@ export const API_ENDPOINTS = {
   login: { method: 'POST', path: '/api/auth/login' },
   currentUser: { method: 'GET', path: '/api/auth/me' },
   logout: { method: 'POST', path: '/api/auth/logout' },
-  listUsers: { method: 'GET', path: '/api/admin/users' },
+  listUsers: { method: 'GET', path: '/api/users' },
   updateUserRole: (id: number): ApiEndpoint => {
     if (!Number.isSafeInteger(id) || id <= 0) throw new RangeError('User ID must be a positive safe integer')
     return { method: 'PUT', path: `/api/admin/users/${id}/role` }

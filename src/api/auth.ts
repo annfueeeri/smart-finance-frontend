@@ -3,7 +3,15 @@ import type { ApiEndpoint } from './endpoints'
 
 export type UserRole = 'ADMIN' | 'USER'
 export type AuthUser = { username: string; role: UserRole }
-export type ManagedUser = AuthUser & { id: number; enabled: boolean }
+export type ManagedUser = AuthUser & {
+  id: number
+  enabled: boolean
+  createdAt: string
+  createdBy: string
+  updatedAt: string
+  updatedBy: string
+  isDeleted: boolean
+}
 export type LoginCredentials = { username: string; password: string }
 export type RegisterCredentials = LoginCredentials & { confirmPassword: string }
 
@@ -114,16 +122,27 @@ export async function logout(): Promise<void> {
   if (response.status !== 204) throw new AuthApiError(502, 'INVALID_RESPONSE')
 }
 
+/** 校验用户一览和身份修改响应，确保字段完整对应，仅提取基本信息和审计字段。 */
 function managedUser(body: unknown): ManagedUser {
   if (!body || typeof body !== 'object' || !('id' in body) || !('username' in body)
     || !('role' in body) || !('enabled' in body) || typeof body.id !== 'number'
     || !Number.isSafeInteger(body.id) || body.id <= 0 || typeof body.username !== 'string' || !body.username
-    || (body.role !== 'ADMIN' && body.role !== 'USER') || typeof body.enabled !== 'boolean') {
+    || (body.role !== 'ADMIN' && body.role !== 'USER') || typeof body.enabled !== 'boolean'
+    || !('createdAt' in body) || typeof body.createdAt !== 'string' || !body.createdAt
+    || !('createdBy' in body) || typeof body.createdBy !== 'string' || !body.createdBy
+    || !('updatedAt' in body) || typeof body.updatedAt !== 'string' || !body.updatedAt
+    || !('updatedBy' in body) || typeof body.updatedBy !== 'string' || !body.updatedBy
+    || !('isDeleted' in body) || typeof body.isDeleted !== 'boolean') {
     throw new AuthApiError(502, 'INVALID_RESPONSE')
   }
-  return { id: body.id, username: body.username, role: body.role, enabled: body.enabled }
+  return {
+    id: body.id, username: body.username, role: body.role, enabled: body.enabled,
+    createdAt: body.createdAt, createdBy: body.createdBy, updatedAt: body.updatedAt,
+    updatedBy: body.updatedBy, isDeleted: body.isDeleted,
+  }
 }
 
+/** 请求 GET /api/users，查询范围由后端按当前会话身份决定，普通用户只收到自己。 */
 export async function listUsers(signal?: AbortSignal): Promise<ManagedUser[]> {
   const response = await request(API_ENDPOINTS.listUsers, { signal })
   await checkResponse(response)
@@ -132,6 +151,7 @@ export async function listUsers(signal?: AbortSignal): Promise<ManagedUser[]> {
   return body.map(managedUser)
 }
 
+/** 携带当前会话的 CSRF 令牌修改目标账号身份，操作者和修改时间由后端记录。 */
 export async function updateUserRole(id: number, role: UserRole, signal?: AbortSignal): Promise<ManagedUser> {
   const endpoint = API_ENDPOINTS.updateUserRole(id)
   const csrf = await csrfToken(signal)

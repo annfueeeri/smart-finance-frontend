@@ -1,5 +1,6 @@
 .user-management .panel-header { gap: 20px; flex-wrap: wrap; }
-.user-table-scroll { overflow-x: auto; }
+.user-table-scroll { overflow-x: auto; max-width: 100%; }
+.user-datetime { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .user-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
 .user-table th, .user-table td { padding: 18px 20px; border-bottom: 1px solid #8cb8db20; }
 .user-table thead th { color: #91a3b9; font-size: 11px; font-weight: 500; white-space: nowrap; }
@@ -16,3 +17,4 @@
 .user-notice { color: #a7eee7; }
 .user-management-note { padding: 16px 24px; color: #91a3b9; font-size: 11px; line-height: 1.8; }
 .user-table select:focus-visible, .user-save:focus-visible, .user-refresh:focus-visible { outline: 2px solid #a7eee7; outline-offset: 3px; }
+.user-table-scroll:focus-visible { outline: 2px solid #a7eee7; outline-offset: -2px; }
