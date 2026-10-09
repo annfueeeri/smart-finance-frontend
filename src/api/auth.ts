@@ -11,9 +11,25 @@ export type ManagedUser = AuthUser & {
   updatedAt: string
   updatedBy: string
   isDeleted: boolean
+  displayName: string
+  email: string
+  phone: string
+  currency: string
+  timezone: string
+  monthlyBudget: string
+  budgetStartDay: number
 }
 export type LoginCredentials = { username: string; password: string }
-export type RegisterCredentials = LoginCredentials & { confirmPassword: string }
+export type RegisterCredentials = LoginCredentials & {
+  confirmPassword: string
+  displayName: string
+  email?: string
+  phone?: string
+  currency?: string
+  timezone?: string
+  monthlyBudget?: string
+  budgetStartDay?: number
+}
 
 type CsrfToken = { token: string; headerName: string }
 
@@ -132,13 +148,22 @@ function managedUser(body: unknown): ManagedUser {
     || !('createdBy' in body) || typeof body.createdBy !== 'string' || !body.createdBy
     || !('updatedAt' in body) || typeof body.updatedAt !== 'string' || !body.updatedAt
     || !('updatedBy' in body) || typeof body.updatedBy !== 'string' || !body.updatedBy
-    || !('isDeleted' in body) || typeof body.isDeleted !== 'boolean') {
+    || !('isDeleted' in body) || typeof body.isDeleted !== 'boolean'
+    || !('displayName' in body) || typeof body.displayName !== 'string' || !body.displayName
+    || !('email' in body) || typeof body.email !== 'string'
+    || !('phone' in body) || typeof body.phone !== 'string'
+    || !('currency' in body) || typeof body.currency !== 'string'
+    || !('timezone' in body) || typeof body.timezone !== 'string'
+    || !('monthlyBudget' in body) || typeof body.monthlyBudget !== 'string'
+    || !('budgetStartDay' in body) || typeof body.budgetStartDay !== 'number' || !Number.isInteger(body.budgetStartDay)) {
     throw new AuthApiError(502, 'INVALID_RESPONSE')
   }
   return {
     id: body.id, username: body.username, role: body.role, enabled: body.enabled,
     createdAt: body.createdAt, createdBy: body.createdBy, updatedAt: body.updatedAt,
     updatedBy: body.updatedBy, isDeleted: body.isDeleted,
+    displayName: body.displayName, email: body.email, phone: body.phone,
+    currency: body.currency, timezone: body.timezone, monthlyBudget: body.monthlyBudget, budgetStartDay: body.budgetStartDay,
   }
 }
 

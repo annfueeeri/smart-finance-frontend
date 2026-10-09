@@ -43,7 +43,7 @@ test('regular users can view only their own information and cannot grant adminis
 
 test('administrator changes persist and update the target existing session immediately', async ({ page, browser }) => {
   await login(page, adminUsername!, adminPassword!)
-  const account = { username: `role-browser-${randomUUID()}`, password: randomUUID() }
+  const account = { displayName: '権限テストユーザー', username: `role-browser-${randomUUID()}`, password: randomUUID() }
   const token = await (await page.request.get('/api/auth/csrf')).json()
   expect((await page.request.post('/api/auth/register', {
     headers: { [token.headerName]: token.token }, data: { ...account, confirmPassword: account.password },
@@ -63,7 +63,7 @@ test('administrator changes persist and update the target existing session immed
     expect(response.request().postDataJSON()).toEqual({ role: 'ADMIN' })
     expect(response.request().headers()['x-csrf-token']?.length).toBeGreaterThan(0)
     const summary = await response.json()
-    expect(Object.keys(summary).sort()).toEqual(['createdAt', 'createdBy', 'enabled', 'id', 'isDeleted', 'role', 'updatedAt', 'updatedBy', 'username'])
+    expect(Object.keys(summary).sort()).toEqual(['budgetStartDay', 'createdAt', 'createdBy', 'currency', 'displayName', 'email', 'enabled', 'id', 'isDeleted', 'monthlyBudget', 'phone', 'role', 'timezone', 'updatedAt', 'updatedBy', 'username'])
     expect(summary.updatedBy).toBe(adminUsername)
     expect(summary.createdAt).toBeTruthy()
     expect((await (await target.request.get('/api/auth/me')).json()).role).toBe('ADMIN')

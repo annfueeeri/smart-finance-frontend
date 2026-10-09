@@ -1,0 +1,49 @@
+.register-page { min-width: 0; }
+.register-page .login-layout { width: min(1220px, calc(100% - 80px)); grid-template-columns: minmax(240px, 1fr) minmax(500px, 670px); gap: 56px; align-items: start; }
+.register-page .login-story { padding-top: 34px; }
+.register-page .login-story h2 { font-size: clamp(32px, 3.2vw, 46px); letter-spacing: 1px; }
+.register-card { padding: 30px 34px; }
+.register-card .card-topline { margin-bottom: 20px; }
+.register-card .card-description { margin-bottom: 24px; }
+.register-required-note { display: block; color: #a6bbc9; font-size: 11px; margin-top: 8px; }
+.required-mark { color: #9ceadf; font-size: 11px; }
+.register-section { margin: 0; padding: 18px 0 0; border: 0; border-top: 1px solid #92cbd326; min-width: 0; }
+.register-section legend { padding: 0 14px 0 0; font-size: 13px; color: #d4e7ee; }
+.register-section legend > span { color: #9ceadf; font-size: 10px; margin-right: 10px; font-variant-numeric: tabular-nums; }
+.register-section legend small { margin-left: 8px; color: #91a3b9; font-size: 10px; }
+.register-section > .form-field + .form-field { margin-top: 18px; }
+.register-field-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.register-card .form-field label { letter-spacing: 0; }
+.register-card input[aria-invalid="true"] { border-color: #ffb8bd; }
+.register-section:disabled input { opacity: .65; }
+.register-signin { text-align: center; font-size: 12px; color: #91a3b9; margin: 0; }
+.register-signin a { color: #a7eee7; margin-left: 6px; text-decoration: underline; text-underline-offset: 4px; }
+.register-profile-preview { display: flex; align-items: center; gap: 16px; padding: 22px; border: 1px solid #92cbd333; background: linear-gradient(140deg, #183c4266, #17243855); border-radius: 16px; margin: 30px 0; }
+.register-avatar { display: grid; place-items: center; flex: 0 0 52px; height: 52px; border-radius: 16px; background: #9ceadf20; color: #b4f8eb; font-size: 24px; }
+.register-profile-preview > div { min-width: 0; flex: 1; }
+.register-profile-preview strong, .register-profile-preview div > span { display: block; overflow-wrap: anywhere; }
+.register-profile-preview strong { color: #d9eaf0; font-size: 15px; font-weight: 500; }
+.register-profile-preview div > span { color: #8eacbd; font-size: 12px; margin-top: 6px; }
+.register-profile-mark { color: #9ceadf; font-size: 24px; }
+.register-benefits { list-style: none; margin: 0 0 36px; padding: 0; display: grid; gap: 22px; }
+.register-benefits li { display: flex; gap: 14px; }
+.register-benefits li > span { color: #8ac8c4; font-size: 10px; padding-top: 4px; }
+.register-benefits strong { font-size: 12px; color: #b4cbd6; font-weight: 500; }
+.register-benefits p { color: #7d94a7; font-size: 11px; margin: 7px 0 0; line-height: 1.7; }
+.register-success-mark { display: grid; place-items: center; width: 56px; height: 56px; border: 1px solid #9ceadf55; border-radius: 50%; color: #9ceadf; font-size: 30px; margin: 24px 0; }
+.register-success-account { padding: 20px; border: 1px solid #92cbd32a; border-radius: 10px; margin: 24px 0; }
+.register-success-account dt { font-size: 11px; color: #91a3b9; }
+.register-success-account dd { margin: 8px 0 0; font-size: 16px; overflow-wrap: anywhere; }
+.register-card .form-field select { width: 100%; height: 50px; padding: 0 12px; border: 1px solid #98b4cb2b; border-radius: 8px; background: #0b1422; color: #eaf2ff; font: inherit; font-size: 13px; }
+.register-card select:focus-visible { outline: 2px solid #99e9df; outline-offset: 2px; }
+.register-card select[aria-invalid="true"] { border-color: #ffb8bd; }
+@media (max-width: 1050px) {
+  .register-page .login-layout { width: min(670px, calc(100% - 32px)); grid-template-columns: minmax(0, 1fr); gap: 0; padding: 20px 0 40px; }
+  .register-page .login-story { display: none; }
+}
+@media (max-width: 560px) {
+  .register-card { padding: 26px 22px; }
+  .register-field-grid { grid-template-columns: minmax(0, 1fr); }
+  .register-page .masthead { flex-wrap: wrap; }
+  .register-page .footer-coordinate { display: none; }
+}

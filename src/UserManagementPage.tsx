@@ -84,10 +84,11 @@ export default function UserManagementPage({ currentUsername, currentRole }: { c
       {notice && <p role="status" className="user-notice">{notice}</p>}
       {!users && !error && <p role="status" className="user-loading">ユーザーを読み込んでいます…</p>}
       {visibleUsers && <div className="user-table-scroll" role="region" aria-label="ユーザー情報一覧" tabIndex={0}><table className="user-table">
-        <thead><tr><th scope="col">ID</th><th scope="col">ユーザー名</th><th scope="col">現在の権限</th><th scope="col">状態</th><th scope="col">作成日時</th><th scope="col">作成ユーザー</th><th scope="col">更新日時</th><th scope="col">更新ユーザー</th><th scope="col">削除状態</th>{isAdmin && <><th scope="col">変更後の権限</th><th scope="col">操作</th></>}</tr></thead>
+        <thead><tr><th scope="col">ID</th><th scope="col">ログインアカウント</th><th scope="col">名前</th><th scope="col">メール</th><th scope="col">電話番号</th><th scope="col">通貨</th><th scope="col">タイムゾーン</th><th scope="col">月額予算</th><th scope="col">予算開始日</th><th scope="col">現在の権限</th><th scope="col">状態</th><th scope="col">作成日時</th><th scope="col">作成ユーザー</th><th scope="col">更新日時</th><th scope="col">更新ユーザー</th><th scope="col">削除状態</th>{isAdmin && <><th scope="col">変更後の権限</th><th scope="col">操作</th></>}</tr></thead>
         <tbody>{visibleUsers.map((user) => <tr key={user.id}>
           <td>{user.id}</td>
           <th scope="row">{user.username}{user.username === currentUsername && <span className="current-user-label">自分</span>}</th>
+          <td>{user.displayName}</td><td>{user.email || '未登録'}</td><td>{user.phone || '未登録'}</td><td>{user.currency}</td><td>{user.timezone}</td><td>{user.monthlyBudget ? `${user.monthlyBudget} ${user.currency}` : '未設定'}</td><td>毎月 {user.budgetStartDay} 日</td>
           <td><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role === 'ADMIN' ? '管理者' : '一般ユーザー'}</span></td>
           <td>{user.enabled ? '有効' : '無効'}</td>
           <td className="user-datetime"><time dateTime={user.createdAt} title={user.createdAt}>{displayTime(user.createdAt)}</time></td>
