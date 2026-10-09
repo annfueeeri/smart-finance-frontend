@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import LoginPage from './LoginPage'
+import RegisterPage from './RegisterPage'
 import AuthenticatedDashboard from './AuthenticatedDashboard'
 import './App.css'
 
@@ -18,6 +19,7 @@ function App() {
   )
 
   if (route === '#/login') return <LoginPage />
+  if (route === '#/register') return <RegisterPage />
   if (route === '#/dashboard' || route.startsWith('#/dashboard/')) return <AuthenticatedDashboard route={route} />
 
   return (
@@ -49,6 +51,7 @@ function App() {
           <a className="login-button" href="#/login">
             <span>ログインして始める</span><span className="button-arrow" aria-hidden="true">↗</span>
           </a>
+          <a className="register-button" href="#/register">新規登録</a>
           <p className="login-caption">YOUR MONEY. YOUR POSSIBILITIES.</p>
         </div>
       </section>

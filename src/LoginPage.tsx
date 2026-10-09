@@ -106,6 +106,7 @@ function LoginPage() {
             </div>
             {error && <p className="login-error" id={`${id}-error`} role="alert">{error}</p>}
             <button type="submit" className="login-button submit-login" disabled={submitting}><span>{submitting ? 'ログイン中…' : 'ログイン'}</span><span className="button-arrow" aria-hidden="true">↗</span></button>
+            <a className="register-button" href="#/register">新規登録</a>
             <span className="login-progress" role="status">{submitting ? 'ログイン情報を確認しています…' : ''}</span>
           </form>
           <div className="card-bottom"><span aria-hidden="true">✦</span><span>登録済みのユーザー名でログインしてください</span></div>

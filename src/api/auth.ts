@@ -1,5 +1,6 @@
 export type AuthUser = { username: string }
 export type LoginCredentials = { username: string; password: string }
+export type RegisterCredentials = LoginCredentials & { confirmPassword: string }
 
 type CsrfToken = { token: string; headerName: string }
 
@@ -65,6 +66,19 @@ async function csrfToken(signal?: AbortSignal): Promise<CsrfToken> {
   return { token: body.token, headerName: body.headerName }
 }
 
+export async function register(credentials: RegisterCredentials, signal?: AbortSignal): Promise<AuthUser> {
+  const csrf = await csrfToken(signal)
+  const response = await request('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
+    body: JSON.stringify(credentials),
+    signal,
+  })
+  await checkResponse(response)
+  if (response.status !== 201) throw new AuthApiError(502, 'INVALID_RESPONSE')
+  return authenticatedUser(response)
+}
+
 export async function login(credentials: LoginCredentials, signal?: AbortSignal): Promise<AuthUser> {
   const csrf = await csrfToken(signal)
   const response = await request('/api/auth/login', {
@@ -103,6 +117,7 @@ export function authErrorMessage(error: unknown): string {
   if (error instanceof AuthApiError) {
     if (error.code === 'INVALID_RESPONSE') return 'サーバーから正しい応答を受信できませんでした。'
     if (error.code === 'INVALID_CREDENTIALS') return 'ユーザー名またはパスワードが正しくありません。'
+    if (error.code === 'USERNAME_TAKEN') return 'このユーザー名はすでに登録されています。別のユーザー名をお試しください。'
     if (error.status === 400) return '入力内容を確認してください。'
     if (error.status === 403) return 'セキュリティ確認の期限が切れました。もう一度お試しください。'
     if (error.status === 429) return '試行回数が多すぎます。しばらく待ってからお試しください。'
