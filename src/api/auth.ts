@@ -33,7 +33,8 @@ export type RegisterCredentials = LoginCredentials & {
 
 type CsrfToken = { token: string; headerName: string }
 
-function request(endpoint: ApiEndpoint, options: RequestInit = {}): Promise<Response> {
+/** 用统一路径发起带会话 Cookie、超时及取消信号的请求。 */
+export function request(endpoint: ApiEndpoint, options: RequestInit = {}): Promise<Response> {
   const timeout = AbortSignal.timeout(15_000)
   const headers = new Headers(options.headers)
   headers.set('Accept', 'application/json')
@@ -47,7 +48,8 @@ function request(endpoint: ApiEndpoint, options: RequestInit = {}): Promise<Resp
   })
 }
 
-async function responseBody(response: Response): Promise<unknown> {
+/** 解析 JSON 响应，无法解析时提示接口响应异常。 */
+export async function responseBody(response: Response): Promise<unknown> {
   try {
     return await response.json()
   } catch {
@@ -77,7 +79,8 @@ export class AuthApiError extends Error {
   }
 }
 
-async function checkResponse(response: Response): Promise<void> {
+/** 将非成功 HTTP 状态转换为包含业务错误码的异常。 */
+export async function checkResponse(response: Response): Promise<void> {
   if (response.ok) return
   const body: unknown = await response.json().catch(() => null)
   const code = body && typeof body === 'object' && 'code' in body && typeof body.code === 'string'
@@ -85,7 +88,8 @@ async function checkResponse(response: Response): Promise<void> {
   throw new AuthApiError(response.status, code)
 }
 
-async function csrfToken(signal?: AbortSignal): Promise<CsrfToken> {
+/** 读取并校验当前会话 CSRF 令牌，供所有写入接口复用。 */
+export async function csrfToken(signal?: AbortSignal): Promise<CsrfToken> {
   const response = await request(API_ENDPOINTS.csrf, { signal })
   await checkResponse(response)
   const body = await responseBody(response)

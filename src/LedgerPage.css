@@ -1,0 +1,27 @@
+.ledger-page { display: grid; gap: 24px; min-width: 0; }
+.ledger-section { padding: 24px; min-width: 0; }
+.ledger-section h2 { margin: 0 0 10px; font-size: 20px; }
+.ledger-section > p { color: #6b7280; font-size: 13px; line-height: 1.8; }
+.ledger-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 18px 0; }
+.ledger-page label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #334155; }
+.ledger-page input, .ledger-page select, .ledger-page textarea { width: 100%; min-width: 0; border: 1px solid #dbe2e8; border-radius: 8px; padding: 10px 12px; background: #fff; font: inherit; color: #1e293b; }
+.ledger-page textarea { min-height: 70px; resize: vertical; }
+.ledger-wide { grid-column: 1 / -1; }
+.ledger-page button { border: 1px solid #dbe2e8; background: #f0f6f5; color: #21645d; border-radius: 8px; padding: 10px 15px; cursor: pointer; font: inherit; font-size: 13px; align-self: end; }
+.ledger-page button:disabled { opacity: .45; cursor: default; }
+.ledger-page :focus-visible { outline: 2px solid #2a8277; outline-offset: 3px; }
+.ledger-page details { margin: 14px 0; font-size: 12px; }
+.ledger-page summary { cursor: pointer; }
+.ledger-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 16px 0; font-size: 12px; }
+.ledger-table-scroll { overflow: auto; max-height: 540px; }
+.ledger-table { border-collapse: collapse; width: 100%; min-width: 660px; font-size: 12px; }
+.ledger-table th, .ledger-table td { padding: 13px 10px; text-align: left; border-bottom: 1px solid #edf0f2; vertical-align: top; overflow-wrap: anywhere; max-width: 240px; }
+.ledger-table th { color: #64748b; background: #f8fafb; position: sticky; top: 0; }
+.ledger-table td details { margin: 0; }
+.ledger-page .ledger-checkbox { flex-direction: row; align-items: center; margin: 15px 0; }
+.ledger-checkbox input { width: auto; }
+.ledger-error, .ledger-notice { padding: 14px; border-radius: 8px; font-size: 13px; line-height: 1.8; }
+.ledger-error { background: #fff1f2; color: #a33d45; }
+.ledger-notice { background: #eaf7f1; color: #22684c; }
+@media (max-width: 850px) { .ledger-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 540px) { .ledger-form { grid-template-columns: 1fr; } .ledger-section { padding: 18px; } }
