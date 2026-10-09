@@ -30,6 +30,29 @@ BACKEND_URL には `/api/auth/login` ではなくバックエンドのオリジ�
 パスワードを `VITE_*` 変数に設定しないでください。これらの変数はブラウザに公開されます。
 `.npmrc` は `/workspace/.npm-cache` を使用します。本機では `npm --cache <書き込み可能なディレクトリ> ci` で変更できます。
 
+## API のリクエストパス
+
+すべての API パスと HTTP メソッドを `src/api/endpoints.ts` にまとめています。
+`src/api/auth.ts` の共通リクエスト処理は、この定義のパスとメソッドを使用します。
+
+| 操作 | HTTP メソッド | 完全なリクエストパス |
+| --- | --- | --- |
+| ヘルスチェック | GET | `/api/health` |
+| CSRF token | GET | `/api/auth/csrf` |
+| 新規登録 | POST | `/api/auth/register` |
+| ログイン | POST | `/api/auth/login` |
+| 現在のユーザー | GET | `/api/auth/me` |
+| ログアウト | POST | `/api/auth/logout` |
+| ユーザー一覧 | GET | `/api/admin/users` |
+| 権限変更 | PUT | `/api/admin/users/{id}/role` |
+
+ブラウザはこれらの完全なパスへ同一サイトの Cookie を付けてリクエストします。
+Vite は `/api` 以下のパスをそのままバックエンドに転送します。
+`BACKEND_URL` にはバックエンドのオリジンのみを指定します。
+たとえば `BACKEND_URL=http://127.0.0.1:18080` なら、ログインの転送先は
+`http://127.0.0.1:18080/api/auth/login` です。
+画面の `#/login` はログインページのルートで、API のパスとは別です。
+
 ## 新規登録
 
 ホームとログイン画面のログインボタンの下に「新規登録」を配置しています。

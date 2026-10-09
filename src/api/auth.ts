@@ -1,3 +1,6 @@
+import { API_ENDPOINTS } from './endpoints'
+import type { ApiEndpoint } from './endpoints'
+
 export type UserRole = 'ADMIN' | 'USER'
 export type AuthUser = { username: string; role: UserRole }
 export type ManagedUser = AuthUser & { id: number; enabled: boolean }
@@ -6,12 +9,13 @@ export type RegisterCredentials = LoginCredentials & { confirmPassword: string }
 
 type CsrfToken = { token: string; headerName: string }
 
-function request(path: string, options: RequestInit = {}): Promise<Response> {
+function request(endpoint: ApiEndpoint, options: RequestInit = {}): Promise<Response> {
   const timeout = AbortSignal.timeout(15_000)
   const headers = new Headers(options.headers)
   headers.set('Accept', 'application/json')
-  return fetch(path, {
+  return fetch(endpoint.path, {
     ...options,
+    method: endpoint.method,
     headers,
     cache: 'no-store',
     credentials: 'same-origin',
@@ -58,7 +62,7 @@ async function checkResponse(response: Response): Promise<void> {
 }
 
 async function csrfToken(signal?: AbortSignal): Promise<CsrfToken> {
-  const response = await request('/api/auth/csrf', { signal })
+  const response = await request(API_ENDPOINTS.csrf, { signal })
   await checkResponse(response)
   const body = await responseBody(response)
   if (!body || typeof body !== 'object' || !('token' in body) || !('headerName' in body)
@@ -71,8 +75,7 @@ async function csrfToken(signal?: AbortSignal): Promise<CsrfToken> {
 
 export async function register(credentials: RegisterCredentials, signal?: AbortSignal): Promise<AuthUser> {
   const csrf = await csrfToken(signal)
-  const response = await request('/api/auth/register', {
-    method: 'POST',
+  const response = await request(API_ENDPOINTS.register, {
     headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
     body: JSON.stringify(credentials),
     signal,
@@ -84,8 +87,7 @@ export async function register(credentials: RegisterCredentials, signal?: AbortS
 
 export async function login(credentials: LoginCredentials, signal?: AbortSignal): Promise<AuthUser> {
   const csrf = await csrfToken(signal)
-  const response = await request('/api/auth/login', {
-    method: 'POST',
+  const response = await request(API_ENDPOINTS.login, {
     headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
     body: JSON.stringify(credentials),
     signal,
@@ -95,7 +97,7 @@ export async function login(credentials: LoginCredentials, signal?: AbortSignal)
 }
 
 export async function currentUser(signal?: AbortSignal): Promise<AuthUser | null> {
-  const response = await request('/api/auth/me', { signal })
+  const response = await request(API_ENDPOINTS.currentUser, { signal })
   if (response.status === 401) return null
   await checkResponse(response)
   return authenticatedUser(response)
@@ -104,8 +106,7 @@ export async function currentUser(signal?: AbortSignal): Promise<AuthUser | null
 export async function logout(): Promise<void> {
   // Login rotates both the Session ID and CSRF token. Fetch the current token for every mutation.
   const csrf = await csrfToken()
-  const response = await request('/api/auth/logout', {
-    method: 'POST',
+  const response = await request(API_ENDPOINTS.logout, {
     headers: { [csrf.headerName]: csrf.token },
   })
   if (response.status === 401) return // The session has already expired.
@@ -124,7 +125,7 @@ function managedUser(body: unknown): ManagedUser {
 }
 
 export async function listUsers(signal?: AbortSignal): Promise<ManagedUser[]> {
-  const response = await request('/api/admin/users', { signal })
+  const response = await request(API_ENDPOINTS.listUsers, { signal })
   await checkResponse(response)
   const body = await responseBody(response)
   if (!Array.isArray(body)) throw new AuthApiError(502, 'INVALID_RESPONSE')
@@ -132,9 +133,10 @@ export async function listUsers(signal?: AbortSignal): Promise<ManagedUser[]> {
 }
 
 export async function updateUserRole(id: number, role: UserRole, signal?: AbortSignal): Promise<ManagedUser> {
+  const endpoint = API_ENDPOINTS.updateUserRole(id)
   const csrf = await csrfToken(signal)
-  const response = await request(`/api/admin/users/${id}/role`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
+  const response = await request(endpoint, {
+    headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
     body: JSON.stringify({ role }), signal,
   })
   await checkResponse(response)
