@@ -19,6 +19,17 @@ export const API_ENDPOINTS = {
   previewImport: { method: 'POST', path: '/api/transactions/import/preview' },
   commitImport: { method: 'POST', path: '/api/transactions/import' },
   exportTransactions: { method: 'GET', path: '/api/transactions/export' },
+  listBudgets: { method: 'GET', path: '/api/budgets' },
+  createBudget: { method: 'POST', path: '/api/budgets' },
+  adjustBudget: (id: number): ApiEndpoint => ({ method: 'PUT', path: `/api/budgets/${id}` }),
+  budgetAdjustments: (id: number): ApiEndpoint => ({ method: 'GET', path: `/api/budgets/${id}/adjustments` }),
+  budgetHistory: { method: 'GET', path: '/api/budgets/history' },
+  listBudgetTemplates: { method: 'GET', path: '/api/budget-templates' },
+  saveBudgetTemplate: { method: 'POST', path: '/api/budget-templates' },
+  applyBudgetTemplate: (id: number): ApiEndpoint => ({ method: 'POST', path: `/api/budget-templates/${id}/apply` }),
+  copyBudgetMonth: { method: 'POST', path: '/api/budgets/copy-month' },
+  budgetNotifications: { method: 'GET', path: '/api/budget-notifications' },
+  readBudgetNotification: (id: number): ApiEndpoint => ({ method: 'PUT', path: `/api/budget-notifications/${id}/read` }),
   listUsers: { method: 'GET', path: '/api/users' },
   updateUserRole: (id: number): ApiEndpoint => {
     if (!Number.isSafeInteger(id) || id <= 0) throw new RangeError('User ID must be a positive safe integer')

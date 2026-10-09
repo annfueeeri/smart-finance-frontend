@@ -1,0 +1,21 @@
+.budget-title { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; justify-content: space-between; }
+.budget-title label { min-width: 170px; }
+.budget-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr)); gap: 18px; margin: 20px 0; }
+.budget-card { padding: 20px; border: 1px solid #dce7e4; border-radius: 12px; background: #fbfdfc; }
+.budget-card-title h3 { margin: 0 0 7px; font-size: 17px; }
+.budget-card-title span, .budget-card > p, .budget-card details { font-size: 12px; color: #667a76; line-height: 1.7; }
+.budget-card.budget-over { border-color: #eeb5af; background: #fff8f7; }
+.budget-amount { font-size: 24px; font-weight: 650; margin: 15px 0; }
+.budget-amount small { font-size: 12px; font-weight: 400; color: #64748b; }
+.budget-card progress { display: block; width: 100%; height: 12px; accent-color: #2a8277; }
+.budget-over progress { accent-color: #be5b4e; }
+.budget-card dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; }
+.budget-card dt { color: #64748b; margin-bottom: 4px; }
+.budget-card dd { margin: 0; }
+.budget-page .budget-warning { color: #af4337; font-size: 13px; line-height: 1.6; }
+.budget-edit { padding: 20px; border: 1px solid #dce7e4; border-radius: 12px; }
+.budget-templates, .budget-notices { list-style: none; padding: 0; }
+.budget-templates li, .budget-notices li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 8px; border-bottom: 1px solid #edf0f2; font-size: 13px; }
+.budget-notices .unread { background: #eff8f4; }
+.budget-notices p { line-height: 1.7; margin: 0 0 5px; }
+.budget-notices time { color: #64748b; font-size: 11px; }

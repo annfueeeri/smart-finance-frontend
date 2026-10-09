@@ -4,6 +4,7 @@ import { authErrorMessage, logout } from './api/auth'
 import type { AuthUser } from './api/auth'
 import UserManagementPage from './UserManagementPage'
 import LedgerPage from './LedgerPage'
+import BudgetPage from './BudgetPage'
 import './DashboardPage.css'
 
 const modules = [
@@ -84,7 +85,7 @@ function DashboardPage({ route, user }: { route: string; user: AuthUser }) {
       </aside>
 
       <div className="dashboard-workspace">
-        <header className="dashboard-topbar"><div className="breadcrumb">ワークスペース <span>/</span> <strong>{activeModule.name}</strong></div><div className="topbar-profile"><span className="demo-badge"><span /> {['users', 'transactions'].includes(activeModule.id) ? '登録データ' : 'サンプルデータ'}</span><span className="profile-avatar">{Array.from(user.username)[0]?.toUpperCase() || 'S'}</span><span>{user.username}</span><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role === 'ADMIN' ? '管理者' : '一般ユーザー'}</span></div></header>
+        <header className="dashboard-topbar"><div className="breadcrumb">ワークスペース <span>/</span> <strong>{activeModule.name}</strong></div><div className="topbar-profile"><span className="demo-badge"><span /> {['users', 'transactions', 'budgets'].includes(activeModule.id) ? '登録データ' : 'サンプルデータ'}</span><span className="profile-avatar">{Array.from(user.username)[0]?.toUpperCase() || 'S'}</span><span>{user.username}</span><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role === 'ADMIN' ? '管理者' : '一般ユーザー'}</span></div></header>
         <main className="dashboard-main">
           <div className="dashboard-heading"><div><p className="dashboard-eyebrow">{activeModule.caption}</p><h1 ref={heading} tabIndex={-1}>{activeModule.name}<span className="title-dot">.</span></h1><p>{activeModule.description}</p></div><span className="workspace-status">{activeModule.id === 'overview' ? 'ログインしました · おかえりなさい' : '個人資産ダッシュボード'}</span></div>
 
@@ -97,7 +98,7 @@ function DashboardPage({ route, user }: { route: string; user: AuthUser }) {
               <section className="dashboard-panel allocation-panel" aria-labelledby="allocation-title"><div className="panel-header"><div><h2 id="allocation-title">資産配分</h2><p>未来のために、可能性を広げる</p></div><Icon name="analytics" /></div><div className="allocation-body"><div className="allocation-donut" role="img" aria-label="資産配分のサンプル：貯蓄口座60%、投資・運用30%、日常用口座10%"><span>3<small>資産区分</small></span></div><div className="allocation-legend">{[{name:'貯蓄口座', value:'60%', color:'#9ceadf'}, {name:'投資・運用', value:'30%', color:'#8b9bdf'}, {name:'日常用口座', value:'10%', color:'#43667e'}].map((item) => <div key={item.name}><span style={{'--legend-color': item.color} as CSSProperties} /><p>{item.name}</p><strong>{item.value}</strong></div>)}</div></div></section>
             </div>
             <section className="dashboard-panel"><div className="panel-header"><div><h2>最近の収支</h2><p>日々の取引を、一つずつ記録</p></div><a className="panel-link" href="#/dashboard/transactions">すべて見る <Icon name="arrow" /></a></div><TransactionTable /></section>
-          </> : activeModule.id === 'transactions' ? <LedgerPage key={user.username} /> : <section className="dashboard-panel module-placeholder"><span className="placeholder-icon"><Icon name={activeModule.icon} /></span><p className="dashboard-eyebrow">{activeModule.caption}</p><h2>{activeModule.name}</h2><p>{activeModule.description}</p><span className="placeholder-note">このモジュールの機能は今後追加予定です。</span><a className="panel-link" href="#/dashboard">資産一覧に戻る <Icon name="arrow" /></a></section>}
+          </> : activeModule.id === 'transactions' ? <LedgerPage key={user.username} /> : activeModule.id === 'budgets' ? <BudgetPage key={user.username} /> : <section className="dashboard-panel module-placeholder"><span className="placeholder-icon"><Icon name={activeModule.icon} /></span><p className="dashboard-eyebrow">{activeModule.caption}</p><h2>{activeModule.name}</h2><p>{activeModule.description}</p><span className="placeholder-note">このモジュールの機能は今後追加予定です。</span><a className="panel-link" href="#/dashboard">資産一覧に戻る <Icon name="arrow" /></a></section>}
           <footer className="dashboard-footer"><span>SMART FINANCE / YOUR PERSONAL WORKSPACE</span><span>{activeModule.id === 'users' ? 'ユーザー情報は最新の登録データです' : 'サンプルデータは画面のデモ用です'}</span></footer>
         </main>
       </div>
