@@ -37,3 +37,4 @@ h1 > span:not(.title-dot) { background: linear-gradient(100deg, #eef5ff 5%, #a5f
 @keyframes rotate { to { transform: rotate(360deg); } }
 @media (min-height: 900px) { .hero { justify-content: center; } .login-area { margin-top: 64px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+.session-check { align-items: center; justify-content: center; gap: 20px; padding: 40px; text-align: center; }

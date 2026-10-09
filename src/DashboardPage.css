@@ -16,6 +16,9 @@
 .sidebar-note p { margin: 10px 0; font-size: 12px; color: #b3c8d8; }
 .sidebar-note p > span { display: block; color: #6f899f; font-size: 10px; margin-top: 9px; }
 .logout-link { padding-bottom: 10px; }
+button.logout-link { width: 100%; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+button.logout-link:disabled { opacity: .6; cursor: wait; }
+.logout-error { padding: 0 14px; color: #ffb8bd; font-size: 11px; line-height: 1.8; }
 .dashboard-workspace { flex: 1; min-width: 0; }
 .dashboard-topbar { height: 80px; padding: 0 36px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #9dbbd21a; }
 .breadcrumb { display: flex; align-items: center; gap: 14px; font-size: 12px; color: #748ca2; }

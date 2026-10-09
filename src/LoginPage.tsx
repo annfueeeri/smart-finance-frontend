@@ -1,19 +1,19 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { login } from './api/auth'
+import { authErrorMessage, login } from './api/auth'
 import './LoginPage.css'
 
 function LoginPage() {
   const id = useId()
   const heading = useRef<HTMLHeadingElement>(null)
-  const [email, setEmail] = useState('')
+  const usernameInput = useRef<HTMLInputElement>(null)
+  const passwordInput = useRef<HTMLInputElement>(null)
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const requestController = useRef<AbortController | null>(null)
-  const emailInput = useRef<HTMLInputElement>(null)
-  const passwordInput = useRef<HTMLInputElement>(null)
+  const pendingRequest = useRef<AbortController | null>(null)
 
   useEffect(() => {
     const previousTitle = document.title
@@ -21,51 +21,40 @@ function LoginPage() {
     heading.current?.focus()
     return () => {
       document.title = previousTitle
-      requestController.current?.abort()
+      pendingRequest.current?.abort()
     }
   }, [])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (requestController.current) return
-    setError('')
-    if (!email.trim() || emailInput.current?.validity.typeMismatch) {
-      setError('有効なメールアドレスを入力してください。')
-      emailInput.current?.focus()
+    if (pendingRequest.current) return
+    const account = username.trim()
+    if (!account || account.length > 64 || /\s/.test(account) || !password) {
+      setError('ユーザー名とパスワードを正しく入力してください。')
+      if (!account || /\s/.test(account)) usernameInput.current?.focus()
+      else passwordInput.current?.focus()
       return
     }
-    if (!password) {
-      setError('パスワードを入力してください。')
+    if (new TextEncoder().encode(password).length > 72) {
+      setError('パスワードは UTF-8 で 72 バイト以内にしてください。')
       passwordInput.current?.focus()
       return
     }
-
+    setSubmitting(true)
+    setError('')
     const controller = new AbortController()
-    requestController.current = controller
-    setIsSubmitting(true)
-    let timedOut = false
-    const timeout = window.setTimeout(() => {
-      timedOut = true
-      controller.abort()
-    }, 15000)
+    pendingRequest.current = controller
     try {
-      await login({ email: email.trim(), password }, controller.signal)
+      await login({ username: account, password }, controller.signal)
       if (!controller.signal.aborted) {
         setPassword('')
         window.location.hash = '/dashboard'
       }
     } catch (cause) {
-      if (timedOut) {
-        setError('接続がタイムアウトしました。もう一度お試しください。')
-      } else if (!controller.signal.aborted) {
-        setError(cause instanceof TypeError
-          ? 'サーバーに接続できませんでした。接続先と通信環境を確認してください。'
-          : cause instanceof Error ? cause.message : 'ログインできませんでした。もう一度お試しください。')
-      }
+      if (!controller.signal.aborted) setError(authErrorMessage(cause))
     } finally {
-      window.clearTimeout(timeout)
-      if (!controller.signal.aborted || timedOut) setIsSubmitting(false)
-      requestController.current = null
+      if (!controller.signal.aborted) setSubmitting(false)
+      if (pendingRequest.current === controller) pendingRequest.current = null
     }
   }
 
@@ -103,23 +92,23 @@ function LoginPage() {
           <h1 id="login-title" ref={heading} tabIndex={-1}>おかえりなさい<span className="title-dot">.</span></h1>
           <p className="card-description">ログインして、資産管理を続けましょう。</p>
 
-          <form className="login-form" onSubmit={handleSubmit} noValidate aria-busy={isSubmitting}>
+          <form className="login-form" onSubmit={handleSubmit} noValidate aria-busy={submitting}>
             <div className="form-field">
-              <label htmlFor={`${id}-email`}>メールアドレス</label>
-              <input id={`${id}-email`} ref={emailInput} name="email" type="email" required disabled={isSubmitting} autoComplete="username" placeholder="name@example.com" value={email} onChange={(event) => setEmail(event.target.value)} />
+              <label htmlFor={`${id}-username`}>ユーザー名</label>
+              <input id={`${id}-username`} ref={usernameInput} name="username" type="text" autoComplete="username" placeholder="ユーザー名を入力" value={username} maxLength={64} required disabled={submitting} aria-describedby={error ? `${id}-error` : undefined} onChange={(event) => setUsername(event.target.value)} />
             </div>
             <div className="form-field">
               <label htmlFor={`${id}-password`}>パスワード</label>
               <div className="password-control">
-                <input id={`${id}-password`} ref={passwordInput} name="password" required disabled={isSubmitting} type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="パスワードを入力" value={password} onChange={(event) => setPassword(event.target.value)} />
-                <button type="button" className="password-toggle" disabled={isSubmitting} aria-label={showPassword ? 'パスワードを非表示' : 'パスワードを表示'} aria-pressed={showPassword} aria-controls={`${id}-password`} onClick={() => setShowPassword((previous) => !previous)}>{showPassword ? '非表示' : '表示'}</button>
+                <input id={`${id}-password`} ref={passwordInput} name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="パスワードを入力" value={password} maxLength={72} required disabled={submitting} aria-describedby={error ? `${id}-error` : undefined} onChange={(event) => setPassword(event.target.value)} />
+                <button type="button" className="password-toggle" disabled={submitting} aria-label={showPassword ? 'パスワードを非表示' : 'パスワードを表示'} aria-pressed={showPassword} aria-controls={`${id}-password`} onClick={() => setShowPassword((previous) => !previous)}>{showPassword ? '非表示' : '表示'}</button>
               </div>
             </div>
-            <button type="submit" className="login-button submit-login" disabled={isSubmitting}><span>{isSubmitting ? 'ログイン中…' : 'ログイン'}</span><span className="button-arrow" aria-hidden="true">↗</span></button>
-            {error && <p className="login-error" role="alert">{error}</p>}
-            <span className="login-progress" role="status">{isSubmitting ? 'ログイン情報を確認しています…' : ''}</span>
+            {error && <p className="login-error" id={`${id}-error`} role="alert">{error}</p>}
+            <button type="submit" className="login-button submit-login" disabled={submitting}><span>{submitting ? 'ログイン中…' : 'ログイン'}</span><span className="button-arrow" aria-hidden="true">↗</span></button>
+            <span className="login-progress" role="status">{submitting ? 'ログイン情報を確認しています…' : ''}</span>
           </form>
-          <div className="card-bottom"><span aria-hidden="true">✦</span><span>メールアドレスとパスワードでログイン</span></div>
+          <div className="card-bottom"><span aria-hidden="true">✦</span><span>登録済みのユーザー名でログインしてください</span></div>
         </section>
       </div>
       <footer className="footer"><span>SMART FINANCE</span><span className="footer-message"><span /> 一歩ずつ、未来へ</span><span className="footer-coordinate">DESIGNED FOR WHAT’S NEXT ↗</span></footer>

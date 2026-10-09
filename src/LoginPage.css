@@ -35,7 +35,7 @@
 .login-card .submit-login { width: 100%; min-height: 52px; margin-top: 5px; font-size: 13px; }
 .card-bottom { display: flex; justify-content: center; align-items: center; gap: 8px; border-top: 1px solid #92cbd31c; padding-top: 20px; margin-top: 10px; font-size: 10px; letter-spacing: 1.5px; color: #8199ac; }
 .card-bottom > span:first-child { color: #9addd4; }
-.login-card .submit-login:disabled { cursor: wait; opacity: .6; transform: none; box-shadow: none; }
-.form-field input:disabled, .password-toggle:disabled { opacity: .65; cursor: wait; }
-.login-error { margin: 0; color: #f3b4b0; font-size: 12px; line-height: 1.7; }
-.login-progress { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.login-error { margin: 0; color: #ffb8bd; font-size: 12px; line-height: 1.8; }
+.submit-login:disabled { opacity: .65; cursor: wait; transform: none; }
+.form-field input:disabled { opacity: .7; }
+.login-progress { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

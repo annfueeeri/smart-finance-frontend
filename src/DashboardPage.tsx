@@ -1,5 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
+import { authErrorMessage, logout } from './api/auth'
+import type { AuthUser } from './api/auth'
 import './DashboardPage.css'
 
 const modules = [
@@ -38,10 +40,26 @@ function TransactionTable() {
   return <table className="transaction-table"><thead><tr><th scope="col">取引内容</th><th scope="col">カテゴリ</th><th scope="col">日付</th><th scope="col">金額</th></tr></thead><tbody>{transactions.map((item) => <tr key={item.name}><td><span className="transaction-name"><span className="transaction-icon"><Icon name={item.icon} /></span>{item.name}</span></td><td>{item.category}</td><td>{item.date}</td><td className={item.positive ? 'amount-positive' : ''}>{item.amount}</td></tr>)}</tbody></table>
 }
 
-function DashboardPage({ route }: { route: string }) {
+function DashboardPage({ route, user }: { route: string; user: AuthUser }) {
   const moduleId = route.split('/')[2] || 'overview'
   const activeModule = modules.find((item) => item.id === moduleId) || modules[0]
   const heading = useRef<HTMLHeadingElement>(null)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
+
+  async function handleLogout() {
+    if (loggingOut) return
+    setLoggingOut(true)
+    setLogoutError('')
+    try {
+      await logout()
+      window.location.hash = '/login'
+    } catch (error) {
+      setLogoutError(authErrorMessage(error))
+    } finally {
+      setLoggingOut(false)
+    }
+  }
 
   useEffect(() => {
     const previousTitle = document.title
@@ -57,11 +75,11 @@ function DashboardPage({ route }: { route: string }) {
         <div className="workspace-label">個人資産ダッシュボード<span>WORKSPACE / 01</span></div>
         <p className="nav-caption">ワークスペース</p>
         <nav aria-label="資産管理メニュー" className="module-nav">{modules.map((item) => <a key={item.id} href={item.id === 'overview' ? '#/dashboard' : `#/dashboard/${item.id}`} className={`module-link${activeModule.id === item.id ? ' is-active' : ''}`} aria-current={activeModule.id === item.id ? 'page' : undefined}><Icon name={item.icon} /><span>{item.name}</span>{activeModule.id === item.id && <span className="nav-active-dot" />}</a>)}</nav>
-        <div className="sidebar-bottom"><div className="sidebar-note"><span className="sidebar-spark" aria-hidden="true">✦</span><p>一歩ずつ、未来へ。<span>資産管理を、もっと心地よく。</span></p></div><a className="module-link logout-link" href="#/login"><Icon name="logout" /><span>ログアウト</span></a></div>
+        <div className="sidebar-bottom"><div className="sidebar-note"><span className="sidebar-spark" aria-hidden="true">✦</span><p>一歩ずつ、未来へ。<span>資産管理を、もっと心地よく。</span></p></div><button type="button" className="module-link logout-link" onClick={handleLogout} disabled={loggingOut}><Icon name="logout" /><span>{loggingOut ? 'ログアウト中…' : 'ログアウト'}</span></button>{logoutError && <p className="logout-error" role="alert">{logoutError}</p>}</div>
       </aside>
 
       <div className="dashboard-workspace">
-        <header className="dashboard-topbar"><div className="breadcrumb">ワークスペース <span>/</span> <strong>{activeModule.name}</strong></div><div className="topbar-profile"><span className="demo-badge"><span /> デモモード · サンプルデータ</span><span className="profile-avatar">S</span><span>デモユーザー</span></div></header>
+        <header className="dashboard-topbar"><div className="breadcrumb">ワークスペース <span>/</span> <strong>{activeModule.name}</strong></div><div className="topbar-profile"><span className="demo-badge"><span /> サンプルデータ</span><span className="profile-avatar">{Array.from(user.username)[0]?.toUpperCase() || 'S'}</span><span>{user.username}</span></div></header>
         <main className="dashboard-main">
           <div className="dashboard-heading"><div><p className="dashboard-eyebrow">{activeModule.caption}</p><h1 ref={heading} tabIndex={-1}>{activeModule.name}<span className="title-dot">.</span></h1><p>{activeModule.description}</p></div><span className="workspace-status">{activeModule.id === 'overview' ? 'ログインしました · おかえりなさい' : '個人資産ダッシュボード'}</span></div>
 
