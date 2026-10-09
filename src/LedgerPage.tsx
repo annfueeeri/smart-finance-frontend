@@ -15,6 +15,10 @@ export default function LedgerPage() {
   const [page, setPage] = useState(0)
   const [revision, setRevision] = useState(0)
   const [entry, setEntry] = useState<EntryInput>({ accountId: 0, kind: 'EXPENSE', amount: '', date: '', category: 'FOOD', merchant: '', note: '' })
+  const [tagText, setTagText] = useState('')
+  const [accountType, setAccountType] = useState('CASH')
+  const [openingBalance, setOpeningBalance] = useState('0')
+  const [openingDate, setOpeningDate] = useState('1900-01-01')
   const [accountName, setAccountName] = useState('')
   const [currency, setCurrency] = useState('')
   const [busy, setBusy] = useState(false)
@@ -62,7 +66,7 @@ export default function LedgerPage() {
   /** 创建本人账户，随后重新加载选项，币种决定可接受的金额小数位。 */
   function createAccount(event: FormEvent) {
     event.preventDefault(); void action(async () => {
-      const account = await ledgerRequest<{ id: number }>(API_ENDPOINTS.createAccount, { name: accountName, currency })
+      const account = await ledgerRequest<{ id: number }>(API_ENDPOINTS.createAccount, { name: accountName, currency, type: accountType, openingBalance, openingDate })
       setAccountName(''); setEntry(current => ({ ...current, accountId: account.id })); setMapping(current => ({ ...current, defaultAccountId: account.id }))
       setRevision(current => current + 1); setNotice('口座を登録しました。')
     })
@@ -70,8 +74,8 @@ export default function LedgerPage() {
   /** 保存一条收支，保留常用账户、分类和日期，清空金额及可选备注并刷新列表。 */
   function saveEntry(event: FormEvent) {
     event.preventDefault(); void action(async () => {
-      await ledgerRequest(API_ENDPOINTS.createTransaction, entry)
-      setEntry(current => ({ ...current, amount: '', merchant: '', note: '' })); setPage(0); setRevision(current => current + 1)
+      await ledgerRequest(API_ENDPOINTS.createTransaction, { ...entry, tags: tagText.split(/[,，]/).map(tag => tag.trim()).filter(Boolean) })
+      setEntry(current => ({ ...current, amount: '', merchant: '', note: '' })); setTagText(''); setPage(0); setRevision(current => current + 1)
       setPreview(null); setNotice('収支を登録しました。')
     })
   }
@@ -81,7 +85,7 @@ export default function LedgerPage() {
     void action(async () => {
       const form = new FormData(); form.set('file', file)
       const value = await ledgerRequest<Inspection>(API_ENDPOINTS.inspectImport, form)
-      const aliases: Record<string, string[]> = { amount: ['amount', '金额', '金額'], date: ['date', '日期', '日付'], kind: ['kind', '类型', '収支'], account: ['account', '账户', '口座'], category: ['category', '分类', 'カテゴリ'], merchant: ['merchant', '商家', '店舗'], note: ['note', '备注', 'メモ'], currency: ['currency', '币种', '通貨'] }
+      const aliases: Record<string, string[]> = { amount: ['amount', '金额', '金額'], date: ['date', '日期', '日付'], kind: ['kind', '类型', '収支'], account: ['account', '账户', '口座'], category: ['category', '分类', 'カテゴリ'], merchant: ['merchant', '商家', '店舗'], note: ['note', '备注', 'メモ'], currency: ['currency', '币种', '通貨'], tags: ['tags', '标签', 'タグ'] }
       const columns: Record<string, number> = {}
       for (const [field, names] of Object.entries(aliases)) { const index = value.headers.findIndex(header => names.includes(header.toLowerCase())); if (index >= 0) columns[field] = index }
       setInspection(value); setMapping(current => ({ ...current, columns })); setPreview(null)
@@ -118,10 +122,11 @@ export default function LedgerPage() {
           <label>取引日<input required type="date" value={entry.date} onChange={event => setEntry({ ...entry, date: event.target.value })} /></label>
           <label>カテゴリ<select value={entry.category} onChange={event => setEntry({ ...entry, category: event.target.value })}>{options.categories.filter(value => value.kind === entry.kind).map(value => <option key={value.code} value={value.code}>{value.name}</option>)}</select></label>
           <label>店舗・取引先<input maxLength={120} value={entry.merchant} onChange={event => setEntry({ ...entry, merchant: event.target.value })} /></label>
+          <label>タグ（カンマ区切り）<input value={tagText} onChange={event => setTagText(event.target.value)} placeholder="旅行,出張,家族（最大10件）" /></label>
           <label className="ledger-wide">メモ<textarea maxLength={1000} value={entry.note} onChange={event => setEntry({ ...entry, note: event.target.value })} /></label>
           <button disabled={busy || !entry.accountId} type="submit">収支を保存</button>
         </form>
-        <details open={!options.accounts.length}><summary>口座を追加</summary><form onSubmit={createAccount} className="ledger-form"><label>口座名<input required maxLength={80} value={accountName} onChange={event => setAccountName(event.target.value)} placeholder="銀行・現金・電子マネーなど" /></label><label>口座通貨<input required pattern="[A-Z]{3}" maxLength={3} value={currency} onChange={event => setCurrency(event.target.value.toUpperCase())} /></label><button disabled={busy} type="submit">口座を保存</button></form></details>
+        <details open={!options.accounts.length}><summary>口座を追加</summary><form onSubmit={createAccount} className="ledger-form"><label>口座名<input required maxLength={80} value={accountName} onChange={event => setAccountName(event.target.value)} placeholder="銀行・現金・電子マネーなど" /></label><label>口座通貨<input required pattern="[A-Z]{3}" maxLength={3} value={currency} onChange={event => setCurrency(event.target.value.toUpperCase())} /></label><label>口座タイプ<select value={accountType} onChange={event => setAccountType(event.target.value)}><option value="BANK">銀行預金</option><option value="CASH">現金</option><option value="EWALLET">電子マネー</option><option value="INVESTMENT">投資資産</option><option value="LIABILITY">負債</option></select></label><label>期初残高（負債は負数）<input required inputMode="decimal" value={openingBalance} onChange={event => setOpeningBalance(event.target.value)} /></label><label>残高基準日<input required type="date" value={openingDate} onChange={event => setOpeningDate(event.target.value)} /></label><button disabled={busy} type="submit">口座を保存</button></form></details>
       </section>
       <section className="dashboard-panel ledger-section"><h2>収支履歴</h2><p>本人の記録のみ表示します。管理者も他の人の収支を閲覧できません。</p>
         <form className="ledger-form" onSubmit={event => { event.preventDefault(); setApplied({ ...filters }); setPage(0); setError('') }}>
@@ -131,11 +136,11 @@ export default function LedgerPage() {
           <button type="submit" disabled={busy}>絞り込む</button><button type="button" onClick={() => { setFilters(emptyFilters); setApplied(emptyFilters); setPage(0) }}>条件をクリア</button>
         </form>
         <div className="ledger-actions"><button disabled={busy || !data?.total} onClick={() => void action(() => downloadEntries(applied, 'csv'))}>CSV をエクスポート</button><button disabled={busy || !data?.total} onClick={() => void action(() => downloadEntries(applied, 'xlsx'))}>Excel をエクスポート</button><span>現在の絞り込み条件で全件出力（最大10,000件）</span></div>
-        {!data ? <p role="status">収支履歴を読み込んでいます…</p> : <><div className="ledger-table-scroll"><table className="ledger-table"><thead><tr>{['日付', '収支', '金額', '口座', 'カテゴリ', '店舗・取引先', 'メモ', '記録情報'].map(name => <th key={name} scope="col">{name}</th>)}</tr></thead><tbody>{data.items.map(value => <tr key={value.id}><td>{value.date}</td><td>{value.kind === 'INCOME' ? '収入' : '支出'}</td><td className={value.kind === 'INCOME' ? 'amount-positive' : ''}>{value.amount} {value.currency}</td><td>{value.accountName}</td><td>{options.categories.find(category => category.code === value.category)?.name || value.category}</td><td>{value.merchant || '—'}</td><td>{value.note || '—'}</td><td><details><summary>ID {value.id}</summary><p>作成: {value.createdAt} / {value.createdBy}<br />更新: {value.updatedAt} / {value.updatedBy}<br />削除: {value.deleted ? 'はい' : 'いいえ'}</p></details></td></tr>)}</tbody></table></div>{!data.total && <p>収支はまだありません。上のフォームから登録できます。</p>}<div className="ledger-actions"><button disabled={!page || busy} onClick={() => setPage(current => current - 1)}>前のページ</button><span>{data.total}件 · {page + 1}ページ</span><button disabled={(page + 1) * data.size >= data.total || busy} onClick={() => setPage(current => current + 1)}>次のページ</button></div></>}
+        {!data ? <p role="status">収支履歴を読み込んでいます…</p> : <><div className="ledger-table-scroll"><table className="ledger-table"><thead><tr>{['日付', '収支', '金額', '口座', 'カテゴリ', '店舗・取引先', 'タグ', 'メモ', '記録情報'].map(name => <th key={name} scope="col">{name}</th>)}</tr></thead><tbody>{data.items.map(value => <tr key={value.id}><td>{value.date}</td><td>{value.kind === 'INCOME' ? '収入' : '支出'}</td><td className={value.kind === 'INCOME' ? 'amount-positive' : ''}>{value.amount} {value.currency}</td><td>{value.accountName}</td><td>{options.categories.find(category => category.code === value.category)?.name || value.category}</td><td>{value.merchant || '—'}</td><td>{value.tags?.join(' / ') || '—'}</td><td>{value.note || '—'}</td><td><details><summary>ID {value.id}</summary><p>作成: {value.createdAt} / {value.createdBy}<br />更新: {value.updatedAt} / {value.updatedBy}<br />削除: {value.deleted ? 'はい' : 'いいえ'}</p></details></td></tr>)}</tbody></table></div>{!data.total && <p>収支はまだありません。上のフォームから登録できます。</p>}<div className="ledger-actions"><button disabled={!page || busy} onClick={() => setPage(current => current - 1)}>前のページ</button><span>{data.total}件 · {page + 1}ページ</span><button disabled={(page + 1) * data.size >= data.total || busy} onClick={() => setPage(current => current + 1)}>次のページ</button></div></>}
       </section>
       <section className="dashboard-panel ledger-section"><h2>CSV・Excel をインポート</h2><p>UTF-8 CSV / .xlsx / .xls、先頭行は見出し。Excel は最初のシートを使用します。5MB・500行・30列まで、数式は使用できません。日付は YYYY-MM-DD または YYYY/M/D。</p>
         <label>流水ファイル<input ref={fileInput} type="file" accept=".csv,.xlsx,.xls" disabled={busy} onChange={event => { setFile(event.target.files?.[0] || null); setInspection(null); setPreview(null) }} /></label><button disabled={busy || !file} onClick={inspectFile}>ファイルを読み込む</button>
-        {inspection && <><h3>フィールドの対応付け · {inspection.totalRows}行</h3><div className="ledger-form">{Object.entries({ amount: '金額（必須）', date: '日付（必須）', kind: '収支区分', account: '口座名', category: 'カテゴリ', merchant: '店舗・取引先', note: 'メモ', currency: '通貨' }).map(([field, label]) => <label key={field}>{label}<select value={mapping.columns[field] ?? ''} disabled={busy} onChange={event => { const columns = { ...mapping.columns }; if (event.target.value === '') delete columns[field]; else columns[field] = Number(event.target.value); setMapping({ ...mapping, columns }); setPreview(null) }}><option value="">列なし（既定値）</option>{inspection.headers.map((header, index) => <option key={index} value={index}>{index + 1}: {header || '名称なし'}</option>)}</select></label>)}
+        {inspection && <><h3>フィールドの対応付け · {inspection.totalRows}行</h3><div className="ledger-form">{Object.entries({ amount: '金額（必須）', date: '日付（必須）', kind: '収支区分', account: '口座名', category: 'カテゴリ', merchant: '店舗・取引先', note: 'メモ', currency: '通貨', tags: 'タグ' }).map(([field, label]) => <label key={field}>{label}<select value={mapping.columns[field] ?? ''} disabled={busy} onChange={event => { const columns = { ...mapping.columns }; if (event.target.value === '') delete columns[field]; else columns[field] = Number(event.target.value); setMapping({ ...mapping, columns }); setPreview(null) }}><option value="">列なし（既定値）</option>{inspection.headers.map((header, index) => <option key={index} value={index}>{index + 1}: {header || '名称なし'}</option>)}</select></label>)}
           <label>既定の収支区分<select value={mapping.defaultKind} onChange={event => { setMapping({ ...mapping, defaultKind: event.target.value, defaultCategory: null }); setPreview(null) }}><option value="INCOME">収入</option><option value="EXPENSE">支出</option></select></label>
           <label>既定の口座<select value={mapping.defaultAccountId ?? ''} onChange={event => { setMapping({ ...mapping, defaultAccountId: Number(event.target.value) || null }); setPreview(null) }}><option value="">口座を選択</option>{options.accounts.map(value => <option key={value.id} value={value.id}>{value.name} · {value.currency}</option>)}</select></label>
           <label>既定のカテゴリ<select value={mapping.defaultCategory ?? ''} onChange={event => { setMapping({ ...mapping, defaultCategory: event.target.value || null }); setPreview(null) }}><option value="">収支に応じて「その他」</option>{options.categories.filter(value => value.kind === mapping.defaultKind).map(value => <option key={value.code} value={value.code}>{value.name}</option>)}</select></label></div>

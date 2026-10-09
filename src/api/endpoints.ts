@@ -30,6 +30,14 @@ export const API_ENDPOINTS = {
   copyBudgetMonth: { method: 'POST', path: '/api/budgets/copy-month' },
   budgetNotifications: { method: 'GET', path: '/api/budget-notifications' },
   readBudgetNotification: (id: number): ApiEndpoint => ({ method: 'PUT', path: `/api/budget-notifications/${id}/read` }),
+  reportOptions: { method: 'GET', path: '/api/reports/options' },
+  financialReport: { method: 'GET', path: '/api/reports/financial' },
+  exportReport: { method: 'GET', path: '/api/reports/export' },
+  createTransfer: { method: 'POST', path: '/api/transfers' },
+  listTransfers: { method: 'GET', path: '/api/transfers' },
+  updateAccount: (id: number): ApiEndpoint => ({ method: 'PUT', path: `/api/accounts/${id}` }),
+  createValuation: (id: number): ApiEndpoint => ({ method: 'POST', path: `/api/accounts/${id}/valuations` }),
+  listValuations: (id: number): ApiEndpoint => ({ method: 'GET', path: `/api/accounts/${id}/valuations` }),
   listUsers: { method: 'GET', path: '/api/users' },
   updateUserRole: (id: number): ApiEndpoint => {
     if (!Number.isSafeInteger(id) || id <= 0) throw new RangeError('User ID must be a positive safe integer')

@@ -1,8 +1,8 @@
 import { API_ENDPOINTS } from './endpoints'
 import type { ApiEndpoint } from './endpoints'
 import { request, checkResponse, responseBody, csrfToken, AuthApiError } from './auth'
-export type Account = { id: number; name: string; currency: string }
-export type EntryInput = { accountId: number; kind: string; amount: string; date: string; category: string; merchant: string; note: string }
+export type Account = { id: number; name: string; currency: string; type: string; openingBalance: string; openingDate: string; createdAt: string; createdBy: string; updatedAt: string; updatedBy: string; deleted: boolean }
+export type EntryInput = { accountId: number; kind: string; amount: string; date: string; category: string; merchant: string; note: string; tags?: string[] }
 export type Entry = EntryInput & { id: number; currency: string; accountName: string; createdAt: string; createdBy: string; updatedAt: string; updatedBy: string; deleted: boolean }
 export type Options = { accounts: Account[]; categories: { code: string; kind: string; name: string }[]; currency: string; timezone: string; today: string }
 export type EntryPage = { items: Entry[]; total: number; page: number; size: number }
@@ -20,16 +20,17 @@ function integer(value: unknown, positive = false): boolean {
 }
 /** 验证账户选项的基础字段，防止与后端账户结构不一致时静默使用错误字段。 */
 function accountValue(value: unknown): boolean {
-  return record(value) && integer(value.id, true) && typeof value.name === 'string' && typeof value.currency === 'string'
+  return record(value) && integer(value.id, true) && ['name', 'currency', 'type', 'openingBalance', 'openingDate', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy'].every(field => typeof value[field] === 'string') && typeof value.deleted === 'boolean'
 }
 /** 验证预览或流水的共同字段；金额必须是字符串，避免浮点转换。 */
 function entryValue(value: unknown): boolean {
   return record(value) && integer(value.accountId, true) && (value.kind === 'INCOME' || value.kind === 'EXPENSE')
+    && (!('tags' in value) || (Array.isArray(value.tags) && value.tags.every(tag => typeof tag === 'string')))
     && ['amount', 'date', 'category', 'merchant', 'note'].every(field => typeof value[field] === 'string')
 }
 /** 验证标准流水的主键、账户及审计字段。 */
 function savedEntryValue(value: unknown): boolean {
-  return record(value) && entryValue(value) && integer(value.id, true) && typeof value.deleted === 'boolean'
+  return record(value) && entryValue(value) && Array.isArray(value.tags) && integer(value.id, true) && typeof value.deleted === 'boolean'
     && ['currency', 'accountName', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy'].every(field => typeof value[field] === 'string')
 }
 /** 按完整路径验证各 API 返回结构，字段缺失或金额类型不匹配时给出接口异常提示。 */
