@@ -31,9 +31,11 @@ export default function AuthenticatedDashboard({ route }: { route: string }) {
     }
     void checkSession()
     window.addEventListener('focus', checkSession)
+    window.addEventListener('auth:changed', checkSession)
     return () => {
       controller.abort()
       window.removeEventListener('focus', checkSession)
+      window.removeEventListener('auth:changed', checkSession)
     }
   }, [route, retry])
 

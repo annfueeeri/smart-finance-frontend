@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { authErrorMessage, logout } from './api/auth'
 import type { AuthUser } from './api/auth'
+import UserManagementPage from './UserManagementPage'
 import './DashboardPage.css'
 
 const modules = [
@@ -11,6 +12,7 @@ const modules = [
   { id: 'budgets', name: '予算管理', caption: 'BUDGETS', icon: 'budgets', description: '支出を計画し、無理のない家計管理を。' },
   { id: 'analytics', name: '資産分析', caption: 'ANALYTICS', icon: 'analytics', description: 'データから、資産の内訳を読み解く。' },
   { id: 'settings', name: 'システム設定', caption: 'SETTINGS', icon: 'settings', description: '自分に合った使いやすい環境に。' },
+  { id: 'users', name: 'ユーザー管理', caption: 'USER MANAGEMENT', icon: 'settings', description: 'ユーザーの権限を管理し、適切なアクセスを設定。' },
 ] as const
 
 type IconName = typeof modules[number]['icon'] | 'logout' | 'arrow'
@@ -74,16 +76,16 @@ function DashboardPage({ route, user }: { route: string; user: AuthUser }) {
         <a className="brand dashboard-brand" href="#/dashboard" aria-label="Smart Finance 資産一覧"><span className="brand-mark" aria-hidden="true">S<span>F</span></span><span>SMART<br /><span className="brand-light">FINANCE</span></span></a>
         <div className="workspace-label">個人資産ダッシュボード<span>WORKSPACE / 01</span></div>
         <p className="nav-caption">ワークスペース</p>
-        <nav aria-label="資産管理メニュー" className="module-nav">{modules.map((item) => <a key={item.id} href={item.id === 'overview' ? '#/dashboard' : `#/dashboard/${item.id}`} className={`module-link${activeModule.id === item.id ? ' is-active' : ''}`} aria-current={activeModule.id === item.id ? 'page' : undefined}><Icon name={item.icon} /><span>{item.name}</span>{activeModule.id === item.id && <span className="nav-active-dot" />}</a>)}</nav>
+        <nav aria-label="資産管理メニュー" className="module-nav">{modules.filter((item) => item.id !== 'users' || user.role === 'ADMIN').map((item) => <a key={item.id} href={item.id === 'overview' ? '#/dashboard' : `#/dashboard/${item.id}`} className={`module-link${activeModule.id === item.id ? ' is-active' : ''}`} aria-current={activeModule.id === item.id ? 'page' : undefined}><Icon name={item.icon} /><span>{item.name}</span>{activeModule.id === item.id && <span className="nav-active-dot" />}</a>)}</nav>
         <div className="sidebar-bottom"><div className="sidebar-note"><span className="sidebar-spark" aria-hidden="true">✦</span><p>一歩ずつ、未来へ。<span>資産管理を、もっと心地よく。</span></p></div><button type="button" className="module-link logout-link" onClick={handleLogout} disabled={loggingOut}><Icon name="logout" /><span>{loggingOut ? 'ログアウト中…' : 'ログアウト'}</span></button>{logoutError && <p className="logout-error" role="alert">{logoutError}</p>}</div>
       </aside>
 
       <div className="dashboard-workspace">
-        <header className="dashboard-topbar"><div className="breadcrumb">ワークスペース <span>/</span> <strong>{activeModule.name}</strong></div><div className="topbar-profile"><span className="demo-badge"><span /> サンプルデータ</span><span className="profile-avatar">{Array.from(user.username)[0]?.toUpperCase() || 'S'}</span><span>{user.username}</span></div></header>
+        <header className="dashboard-topbar"><div className="breadcrumb">ワークスペース <span>/</span> <strong>{activeModule.name}</strong></div><div className="topbar-profile"><span className="demo-badge"><span /> サンプルデータ</span><span className="profile-avatar">{Array.from(user.username)[0]?.toUpperCase() || 'S'}</span><span>{user.username}</span><span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role === 'ADMIN' ? '管理者' : '一般ユーザー'}</span></div></header>
         <main className="dashboard-main">
           <div className="dashboard-heading"><div><p className="dashboard-eyebrow">{activeModule.caption}</p><h1 ref={heading} tabIndex={-1}>{activeModule.name}<span className="title-dot">.</span></h1><p>{activeModule.description}</p></div><span className="workspace-status">{activeModule.id === 'overview' ? 'ログインしました · おかえりなさい' : '個人資産ダッシュボード'}</span></div>
 
-          {activeModule.id === 'overview' ? <>
+          {activeModule.id === 'users' ? (user.role === 'ADMIN' ? <UserManagementPage currentUsername={user.username} /> : <section className="dashboard-panel module-placeholder"><p role="alert">ユーザー管理を操作できるのは管理者だけです。</p><a className="panel-link" href="#/dashboard">資産一覧に戻る</a></section>) : activeModule.id === 'overview' ? <>
             <section className="summary-grid" aria-label="資産サマリー">
               {[{label: '総資産', value: '128,560', decimals: '.00', note: '全口座の資産合計', icon: 'accounts'}, {label: '今月の収入', value: '19,200', decimals: '.00', note: '給与と投資収益', icon: 'analytics'}, {label: '今月の支出', value: '5,840', decimals: '.00', note: '今月の支出合計', icon: 'transactions'}, {label: '今月の収支差額', value: '13,360', decimals: '.00', note: '日々の積み重ねを未来へ', icon: 'budgets'}].map((item, index) => <article className={`summary-card${index === 0 ? ' primary-summary' : ''}`} key={item.label}><div className="summary-label">{item.label}<Icon name={item.icon as IconName} /></div><p className="summary-value"><span>¥</span>{item.value}<small>{item.decimals}</small></p><span className="summary-note">{item.note}</span></article>)}
             </section>

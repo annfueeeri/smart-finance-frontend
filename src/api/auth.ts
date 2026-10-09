@@ -1,4 +1,6 @@
-export type AuthUser = { username: string }
+export type UserRole = 'ADMIN' | 'USER'
+export type AuthUser = { username: string; role: UserRole }
+export type ManagedUser = AuthUser & { id: number; enabled: boolean }
 export type LoginCredentials = { username: string; password: string }
 export type RegisterCredentials = LoginCredentials & { confirmPassword: string }
 
@@ -28,10 +30,11 @@ async function responseBody(response: Response): Promise<unknown> {
 async function authenticatedUser(response: Response): Promise<AuthUser> {
   const body = await responseBody(response)
   if (!body || typeof body !== 'object' || !('username' in body)
-      || typeof body.username !== 'string' || !body.username) {
+      || typeof body.username !== 'string' || !body.username || !('role' in body)
+      || (body.role !== 'ADMIN' && body.role !== 'USER')) {
     throw new AuthApiError(502, 'INVALID_RESPONSE')
   }
-  return { username: body.username }
+  return { username: body.username, role: body.role }
 }
 
 export class AuthApiError extends Error {
@@ -110,6 +113,34 @@ export async function logout(): Promise<void> {
   if (response.status !== 204) throw new AuthApiError(502, 'INVALID_RESPONSE')
 }
 
+function managedUser(body: unknown): ManagedUser {
+  if (!body || typeof body !== 'object' || !('id' in body) || !('username' in body)
+    || !('role' in body) || !('enabled' in body) || typeof body.id !== 'number'
+    || !Number.isSafeInteger(body.id) || body.id <= 0 || typeof body.username !== 'string' || !body.username
+    || (body.role !== 'ADMIN' && body.role !== 'USER') || typeof body.enabled !== 'boolean') {
+    throw new AuthApiError(502, 'INVALID_RESPONSE')
+  }
+  return { id: body.id, username: body.username, role: body.role, enabled: body.enabled }
+}
+
+export async function listUsers(signal?: AbortSignal): Promise<ManagedUser[]> {
+  const response = await request('/api/admin/users', { signal })
+  await checkResponse(response)
+  const body = await responseBody(response)
+  if (!Array.isArray(body)) throw new AuthApiError(502, 'INVALID_RESPONSE')
+  return body.map(managedUser)
+}
+
+export async function updateUserRole(id: number, role: UserRole, signal?: AbortSignal): Promise<ManagedUser> {
+  const csrf = await csrfToken(signal)
+  const response = await request(`/api/admin/users/${id}/role`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
+    body: JSON.stringify({ role }), signal,
+  })
+  await checkResponse(response)
+  return managedUser(await responseBody(response))
+}
+
 export function authErrorMessage(error: unknown): string {
   if (error instanceof DOMException && error.name === 'TimeoutError') {
     return '接続がタイムアウトしました。もう一度お試しください。'
@@ -118,6 +149,9 @@ export function authErrorMessage(error: unknown): string {
     if (error.code === 'INVALID_RESPONSE') return 'サーバーから正しい応答を受信できませんでした。'
     if (error.code === 'INVALID_CREDENTIALS') return 'ユーザー名またはパスワードが正しくありません。'
     if (error.code === 'USERNAME_TAKEN') return 'このユーザー名はすでに登録されています。別のユーザー名をお試しください。'
+    if (error.code === 'LAST_ADMIN') return '最後の有効な管理者は一般ユーザーに変更できません。先に別の管理者を指定してください。'
+    if (error.code === 'USER_NOT_FOUND') return 'このユーザーは見つかりません。ユーザー一覧を更新してください。'
+    if (error.status === 401) return 'セッションが切れました。もう一度ログインしてください。'
     if (error.status === 400) return '入力内容を確認してください。'
     if (error.status === 403) return 'セキュリティ確認の期限が切れました。もう一度お試しください。'
     if (error.status === 429) return '試行回数が多すぎます。しばらく待ってからお試しください。'

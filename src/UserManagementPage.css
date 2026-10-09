@@ -1,0 +1,18 @@
+.user-management .panel-header { gap: 20px; flex-wrap: wrap; }
+.user-table-scroll { overflow-x: auto; }
+.user-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+.user-table th, .user-table td { padding: 18px 20px; border-bottom: 1px solid #8cb8db20; }
+.user-table thead th { color: #91a3b9; font-size: 11px; font-weight: 500; white-space: nowrap; }
+.user-table tbody th { font-weight: 500; overflow-wrap: anywhere; }
+.current-user-label { margin-left: 10px; font-size: 10px; color: #91a3b9; white-space: nowrap; }
+.role-badge { display: inline-flex; padding: 5px 10px; border-radius: 20px; border: 1px solid #92cbd34d; color: #a8bdcf; font-size: 11px; white-space: nowrap; }
+.role-admin { color: #a7eee7; background: #9ceadf13; border-color: #9ceadf55; }
+.user-table select { background: #102334; color: #eaf2ff; border: 1px solid #92cbd34d; border-radius: 6px; padding: 9px 12px; font: inherit; min-width: 140px; }
+.user-refresh, .user-save { border: 1px solid #92cbd34d; border-radius: 6px; padding: 9px 14px; font: inherit; font-size: 12px; color: #a7eee7; background: #102334; white-space: nowrap; }
+.user-save { background: #a7eee7; color: #102334; }
+.user-refresh:disabled, .user-save:disabled, .user-table select:disabled { opacity: .5; cursor: not-allowed; }
+.user-error, .user-notice, .user-loading { padding: 0 24px; font-size: 13px; line-height: 1.8; }
+.user-error { color: #ffb8bd; }
+.user-notice { color: #a7eee7; }
+.user-management-note { padding: 16px 24px; color: #91a3b9; font-size: 11px; line-height: 1.8; }
+.user-table select:focus-visible, .user-save:focus-visible, .user-refresh:focus-visible { outline: 2px solid #a7eee7; outline-offset: 3px; }
